@@ -53,7 +53,7 @@ def main():
         logger.info(f"Initiating connection to cloud playwright grid")
         browser = playwright.chromium.connect(lt_cdp_url)        
         # comment above line & uncomment below line to test on local grid
-        # browser = playwright.chromium.launch() 
+        # browser = playwright.chromium.launch(headless=False) 
         page = browser.new_page()
         try:            
             # section to navigate to software category  
@@ -65,12 +65,15 @@ def main():
             ).select_option(
                 "https://ecommerce-playground.lambdatest.io/index.php?route=product/category&path=17&limit=75"
             )
-            page.goto(page_to_be_scrapped[0])                        
+            page.goto(page_to_be_scrapped[0])
+            
             # Since image are lazy-loaded scroll to bottom of page
-            for i in range(75):
+            # the range is dynamically decided based on the number of items i.e. we take the range from limit
+            # https://ecommerce-playground.lambdatest.io/index.php?route=product/category&path=17&limit=75
+            for i in range(int(page_to_be_scrapped[0].split("=")[-1])):
                 page.mouse.wheel(0, 300)
                 i += 1
-                time.sleep(1)
+                time.sleep(0.1)
             # Construct locators to identify name, price & image
             base_product_row_locator = page.locator("#entry_212408").locator(".row").locator(".product-grid")
             product_name = base_product_row_locator.get_by_role("heading")
